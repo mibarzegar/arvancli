@@ -20,10 +20,10 @@ class Shell:
            if self._check_and_set_command():
                 self._cloud_entity   = self._cloud_service.get(self._current_command)
                 parsed_args = self._parse_args()
-                self._conf_manager(parsed_args, 'general')
-                session = Session(self._token, self._zone)
+                self._conf_manager({}, 'general')
+                session = Session(eval(self._token), eval(self._zone))
                 if self._check_and_set_command():
-                    self._cloud_entity.run(self._current_command, session)
+                    self._cloud_entity.run(self._current_command, session, parsed_args)
        parsed_args = self._parse_args()
        self._conf_manager(parsed_args, 'general')
     def _check_and_set_command(self) -> bool:

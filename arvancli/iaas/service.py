@@ -1,6 +1,6 @@
 from arvancli.common.builder import Builder
 from arvancli.common.provider import Provider
-from arvancli.iaas.entities import RegionEntityBuilder
+from arvancli.iaas.entities import RegionEntityBuilder, ServerEntityBuilder
 from argparse import _SubParsersAction
 
 class IaasService(Provider):
@@ -9,7 +9,10 @@ class IaasService(Provider):
 
 class IaasServiceBuilder(Builder):
     def __init__(self, parser: _SubParsersAction) -> None:
-        super().__init__(parser, {'region': RegionEntityBuilder})
+        super().__init__(parser, {'region': RegionEntityBuilder,
+                                  'server': ServerEntityBuilder
+                                 }
+                        )
     def __call__(self) -> IaasService:
         self._provider = IaasService()
         self._service_registrar()

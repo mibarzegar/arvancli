@@ -18,10 +18,18 @@ This tool currently supports below services and actions of the provider:
 
       * Country
       * City
-      * Datacente
+      * Datacenter
       * Code
       * Available
       * Coming Soon
+    
+  * **server** Entity
+  
+    * **id** command: get id of specified server
+  
+      ```bash
+      arvancli iaas server id --name "{SERVER_NAME}"
+      ```
 
 
 ## Usage
@@ -42,7 +50,7 @@ This tool currently supports below services and actions of the provider:
    arvancli configure --token="{API_TOKEN}" --zone="{DEFAULT_ZONE}"
    ```
 
-4. And then run the CLI:
+4. And then run the cli:
 
    ```bash
    arvancli --help

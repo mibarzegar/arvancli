@@ -16,8 +16,8 @@ class RegionEntitiy:
         cmd = RegionsListCommand(receiver, session)
         invoker = Invoker()
         invoker.store_command(cmd)
-        invoker.execute_commands()
-        regions_list = invoker.results[0]
+        invoker.execute_command()
+        regions_list = invoker.get_result()
         pt = PrettyTable()
         pt.field_names = regions_list[0].keys()
         for region in regions_list:
@@ -40,8 +40,8 @@ class ServerEntitiy:
         cmd = ServerIdCommand(receiver, session)
         invoker = Invoker()
         invoker.store_command(cmd)
-        invoker.execute_commands()
-        server_id = invoker.results[0]
+        invoker.execute_command()
+        server_id = invoker.get_result()
         print(f'Server ID is: {server_id}')
     def _prepare_command_table(self) -> None:
         self._command_table = {'id' : self._get_id}

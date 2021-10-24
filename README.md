@@ -31,6 +31,12 @@ This tool currently supports below services and actions of the provider:
       arvancli iaas server id --name "{SERVER_NAME}"
       ```
 
+    * **status** command: get status of specified server
+
+      ```bash
+      arvancli iaas server status --name "{SERVER_NAME}"
+      ```
+
 
 ## Usage
 

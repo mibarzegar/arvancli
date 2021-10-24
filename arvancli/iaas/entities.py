@@ -43,8 +43,24 @@ class ServerEntitiy:
         invoker.execute_command()
         server_id = invoker.get_result()
         print(f'Server ID is: {server_id}')
+    def _get_status(self, session: Session) -> None:
+        receiver = Receiver(self._arguments)
+        cmd = ServerIdCommand(receiver, session)
+        invoker = Invoker()
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        arguments = {}
+        arguments['id'] = invoker.get_result()
+        receiver = Receiver(arguments)
+        cmd = ServerStatusCommand(receiver, session)
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        server_status = invoker.get_result()
+        print(f'Server Status is: {server_status}')
     def _prepare_command_table(self) -> None:
-        self._command_table = {'id' : self._get_id}
+        self._command_table = {'id'     : self._get_id,
+                               'status' : self._get_status,
+                              }
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
         if command in self._command_table:
@@ -61,7 +77,12 @@ class RegionEntityBuilder(EntityBuilder):
 
 class ServerEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
-        super().__init__(subparsers, {'id': [['"--name"', 'help="Name of the server"']] })
+        super().__init__(subparsers, {'id':      [['"--name"', 'help="Name of the server"'],
+                                                 ],
+                                      'status':  [['"--name"', 'help="Name of the server"'],
+                                                 ],
+                                     }
+                        )
     def __call__(self) -> None:
         self._entity = ServerEntitiy()
         return self._entity

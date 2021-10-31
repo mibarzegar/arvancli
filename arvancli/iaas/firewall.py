@@ -79,3 +79,33 @@ class FirewallDeleteCommand(Command):
         raw_url = "https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/securities/{firewall_id}"
         url = raw_url.format(firewall_id=id)
         self._session.send_request('DELETE', url)
+
+class FirewallRulesCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = "https://napi.arvancloud.com/ecc/v1/regions/{zone}/securities"
+        self._session.send_request('GET', url)
+        rules_list = []
+        firewalls_json_array = self._session.get_json_response()["data"]
+        try:
+            selected_firewall_json = next(element for element in firewalls_json_array if element['name'] == self._receiver.get('name'))
+        except StopIteration:
+            print(f'{self._receiver.get("name")} not found!')
+            sys.exit(1)
+        number = 0
+        for rule in selected_firewall_json["rules"]:
+            rule_json = {}
+            number += 1
+            rule_json["#"] = number
+            rule_json["Type"] = rule["ether_type"]
+            rule_json["Direction"] = rule["direction"]
+            rule_json["Protocol"] = rule["protocol"] if rule["protocol"] != "" else "All"
+            rule_json["Ports"] = "All" if (rule["port_start"] == None and rule["port_end"] == None) else str(rule["port_start"]) + "-" + str(rule["port_end"])
+            rule_json["Origin/Destination"]  = rule["ip"] if rule["ip"] != "" else "All"
+            rule_json["Access Type"] = "Available"
+            rules_list.append(rule_json)
+        return(rules_list)
+

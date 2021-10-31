@@ -72,6 +72,22 @@ This tool currently supports below services and actions of the provider:
       arvancli iaas firewall delete --name "{FIREWALL_GROUP_NAME}"
       ```
 
+    * **list-rules** command: list rules inside a security group with specified name
+
+      ```bash
+      arvancli iaas firewall list-rules --name "{FIREWALL_GROUP_NAME}" 
+      ```
+
+      List will be appeared in a tabular format with below columns:
+
+      * \#
+      * Type
+      * Direction
+      * Protocol
+      * Ports
+      * Origin/Destination
+      * Access Type
+
 
 ## Usage
 

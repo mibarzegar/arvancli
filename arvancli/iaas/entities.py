@@ -116,11 +116,24 @@ class FirewallEntitiy:
         invoker.execute_command()
         firewall_name = invoker.get_result()
         print(f'Firewall Group deleted successfully')
+    def _list_rules(self, session: Session) -> None:
+        receiver = Receiver(self._arguments)
+        cmd = FirewallRulesCommand(receiver, session)
+        invoker = Invoker()
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        rules_list = invoker.get_result()
+        pt = PrettyTable()
+        pt.field_names = rules_list[0].keys()
+        for rule in rules_list:
+            pt.add_row(rule.values())
+        print(pt)
     def _prepare_command_table(self) -> None:
         self._command_table = {'ls'     : self._get_list,
                                'id'     : self._get_id,
                                'create' : self._create,
                                'delete' : self._delete,
+                               'list-rules'  : self._list_rules
                               }
 
     def run(self, command: str, session: Session, arguments: dict) -> None:
@@ -151,15 +164,17 @@ class ServerEntityBuilder(EntityBuilder):
 
 class FirewallEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
-        super().__init__(subparsers, {'ls':     [[],
-                                                ],
-                                      'id':     [['"--name"', 'help="Name of the firewall group"'],
-                                                ],
-                                      'create': [['"--name"'       , 'help="Name of the firewall group"'],
-                                                 ['"--description"', 'help="Description of the firewall group"'],
-                                                ],
-                                      'delete': [['"--name"'       , 'help="Name of the firewall group"'],
-                                                ],
+        super().__init__(subparsers, {'ls'         : [[],
+                                                     ],
+                                      'id'         : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                     ],
+                                      'create'     : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                      ['"--description"', 'help="Description of the firewall group"'],
+                                                     ],
+                                      'delete'     : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                     ],
+                                      'list-rules' : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                     ],
                                      }
                         )
     def __call__(self) -> None:

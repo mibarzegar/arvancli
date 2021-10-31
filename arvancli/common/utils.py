@@ -5,10 +5,12 @@ class Session:
         self._zone = zone
         self._session = requests.Session()
         self._prepare_headers(token)
-    def send_request(self, method: str, raw_url: str) -> None:
+    def send_request(self, method: str, raw_url: str, **kwargs) -> None:
         url = raw_url.format(zone=self._zone)
         if method == 'GET':
            self._response = self._session.get(url, headers=self._headers)
+        elif method == 'POST':
+            self._response = self._session.post(url, headers=self._headers, data=kwargs.get('body'))
         else:
            raise ValueError(method)
     def get_json_response(self) -> dict:

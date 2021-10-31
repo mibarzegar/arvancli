@@ -43,3 +43,28 @@ class FirewallIdCommand(Command):
             sys.exit(1)
         firewall_id = selected_firewall_json['id']
         return(firewall_id)
+
+class FirewallCreateCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        if self._receiver.get('name') == "arCDN":
+            url = "https://napi.arvancloud.com/ecc/v1/regions/{zone}/securities/cdn"
+        else:
+            url = "https://napi.arvancloud.com/ecc/v1/regions/{zone}/securities"
+        if self._receiver.get('name') != "arCDN":
+            body = { "name": "",
+                     "description": ""
+                   }
+            body["name"] = self._receiver.get('name')
+            body["description"] = self._receiver.get('description')
+            self._session.send_request('POST', url, body=json.dumps(body))
+            firewall_details = self._session.get_json_response()["data"]
+            if firewall_details["id"] == None:
+                raise Exception("Security group creation failed")
+                sys.exit(1)
+        else:
+            self._session.send_request('POST', url)
+        return(self._receiver.get('name'))

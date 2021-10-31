@@ -94,9 +94,18 @@ class FirewallEntitiy:
         invoker.execute_command()
         firewall_id = invoker.get_result()
         print(f'Firewall Group ID is: {firewall_id}')
+    def _create(self, session: Session) -> None:
+        receiver = Receiver(self._arguments)
+        cmd = FirewallCreateCommand(receiver, session)
+        invoker = Invoker()
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        firewall_name = invoker.get_result()
+        print(f'Firewall Group "{firewall_name}" created successfully')
     def _prepare_command_table(self) -> None:
-        self._command_table = {'ls' : self._get_list,
-                               'id' : self._get_id,
+        self._command_table = {'ls'     : self._get_list,
+                               'id'     : self._get_id,
+                               'create' : self._create,
                               }
 
     def run(self, command: str, session: Session, arguments: dict) -> None:
@@ -127,10 +136,13 @@ class ServerEntityBuilder(EntityBuilder):
 
 class FirewallEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
-        super().__init__(subparsers, {'ls': [[],
-                                            ],
-                                      'id': [['"--name"', 'help="Name of the firewall group"'],
-                                            ],
+        super().__init__(subparsers, {'ls':     [[],
+                                                ],
+                                      'id':     [['"--name"', 'help="Name of the firewall group"'],
+                                                ],
+                                      'create': [['"--name"'       , 'help="Name of the firewall group"'],
+                                                 ['"--description"', 'help="Description of the firewall group"'],
+                                                ],
                                      }
                         )
     def __call__(self) -> None:

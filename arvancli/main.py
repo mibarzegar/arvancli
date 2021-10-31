@@ -24,8 +24,9 @@ class Shell:
                 session = Session(eval(self._token), eval(self._zone))
                 if self._check_and_set_command():
                     self._cloud_entity.run(self._current_command, session, parsed_args)
-       parsed_args = self._parse_args()
-       self._conf_manager(parsed_args, 'general')
+       else:
+           parsed_args = self._parse_args()
+           self._conf_manager(parsed_args, 'general')
     def _check_and_set_command(self) -> bool:
         shell_commands = [{'configure', '--help'}, {'--help'}, {'--help'}]
         if self._argv[self._argv_position] not in shell_commands[self._argv_position]:

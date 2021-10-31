@@ -3,6 +3,7 @@ from arvancli.common.receiver import Receiver
 from arvancli.common.invoker import Invoker
 from arvancli.iaas.region import *
 from arvancli.iaas.server import *
+from arvancli.iaas.firewall import *
 from prettytable import PrettyTable
 from arvancli.common.utils import Session
 from argparse import _SubParsersAction
@@ -68,6 +69,31 @@ class ServerEntitiy:
         else:
             raise ValueError(key)
 
+class FirewallEntitiy:
+    def __init__(self) -> None:
+        self._prepare_command_table()
+        self._arguments = None
+    def _get_list(self, session: Session) -> None:
+        receiver = Receiver(self._arguments)
+        cmd = FirewallsListCommand(receiver, session)
+        invoker = Invoker()
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        firewalls_list = invoker.get_result()
+        pt = PrettyTable()
+        pt._max_width = {"Servers" : 90}
+        pt.field_names = firewalls_list[0].keys()
+        for firewall in firewalls_list:
+            pt.add_row(firewall.values())
+        print(pt)
+    def _prepare_command_table(self) -> None:
+        self._command_table = {'ls' : self._get_list}
+    def run(self, command: str, session: Session, arguments: dict) -> None:
+        if command in self._command_table:
+            self._command_table[command](session)
+        else:
+            raise ValueError(key)
+
 class RegionEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
         super().__init__(subparsers, {'ls': [[]]})
@@ -85,4 +111,11 @@ class ServerEntityBuilder(EntityBuilder):
                         )
     def __call__(self) -> None:
         self._entity = ServerEntitiy()
+        return self._entity
+
+class FirewallEntityBuilder(EntityBuilder):
+    def __init__(self, subparsers: _SubParsersAction) -> None:
+        super().__init__(subparsers, {'ls': [[]]})
+    def __call__(self) -> None:
+        self._entity = FirewallEntitiy()
         return self._entity

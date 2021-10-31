@@ -8,7 +8,7 @@ This tool currently supports below services and actions of the provider:
 
   * **region** Entitiy
 
-    * **list** command: get list of regions
+    * **ls** command: get list of regions
 
       ```Bash
       arvancli iaas region ls
@@ -36,7 +36,21 @@ This tool currently supports below services and actions of the provider:
       ```bash
       arvancli iaas server status --name "{SERVER_NAME}"
       ```
-
+    
+  * **firewall** Entitiy
+  
+    * **ls** command: get list of firewall groups
+  
+      ```Bash
+      arvancli iaas firewall ls
+      ```
+  
+    * List will be appeared in a tabular format with below columns:
+  
+      * Name
+      * Description
+      * Real Name
+      * Servers
 
 ## Usage
 
@@ -45,11 +59,9 @@ This tool currently supports below services and actions of the provider:
 2. Then install required packages and run setup script:
 
    ```bash
-   pip install -r requirements.txt
-   python setup.py install
-   pip install -e .
+   pip install -e . -r requirements.txt
    ```
-
+   
 3. Then configure cli:
 
    ```bash

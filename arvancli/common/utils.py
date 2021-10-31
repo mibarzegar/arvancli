@@ -11,6 +11,8 @@ class Session:
            self._response = self._session.get(url, headers=self._headers)
         elif method == 'POST':
             self._response = self._session.post(url, headers=self._headers, data=kwargs.get('body'))
+        elif method == 'DELETE':
+            self._response = self._session.delete(url, headers=self._headers)
         else:
            raise ValueError(method)
     def get_json_response(self) -> dict:

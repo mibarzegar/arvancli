@@ -68,3 +68,14 @@ class FirewallCreateCommand(Command):
         else:
             self._session.send_request('POST', url)
         return(self._receiver.get('name'))
+
+class FirewallDeleteCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        id = self._receiver.get('id')
+        raw_url = "https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/securities/{firewall_id}"
+        url = raw_url.format(firewall_id=id)
+        self._session.send_request('DELETE', url)

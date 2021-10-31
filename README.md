@@ -52,19 +52,26 @@ This tool currently supports below services and actions of the provider:
       * Real Name
       * Servers
 
-  * **id** command: get id of specified firewall group
+    * **id** command: get id of specified firewall group
 
-    ```bash
-    arvancli iaas firewall id --name "{FIREWALL_GROUP_NAME}"
-    ```
+      ```bash
+      arvancli iaas firewall id --name "{FIREWALL_GROUP_NAME}"
+      ```
 
-  * **create** command: create firewall group with specified name and description
+    * **create** command: create firewall group with specified name and description
 
-    ```bash
-    arvancli iaas firewall create --name "{FIREWALL_GROUP_NAME}" --description "{FIREWALL_GROUP_DESCRIPTION}"
-    ```
+      ```bash
+      arvancli iaas firewall create --name "{FIREWALL_GROUP_NAME}" --description "{FIREWALL_GROUP_DESCRIPTION}"
+      ```
 
-    **Note:** To Add ArvanCDN Servers firewall group to the list of firewall groups, *FIREWALL_GROUP_NAME* must be set to arCDN  and no description is required.
+      **Note:** To Add ArvanCDN Servers firewall group to the list of firewall groups, *FIREWALL_GROUP_NAME* must be set to arCDN  and no description is required.
+
+    * **delete** command: delete security group with specified name
+
+      ```bash
+      arvancli iaas firewall delete --name "{FIREWALL_GROUP_NAME}"
+      ```
+
 
 ## Usage
 

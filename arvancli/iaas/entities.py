@@ -86,9 +86,21 @@ class FirewallEntitiy:
         for firewall in firewalls_list:
             pt.add_row(firewall.values())
         print(pt)
+    def _get_id(self, session: Session) -> None:
+        receiver = Receiver(self._arguments)
+        cmd = FirewallIdCommand(receiver, session)
+        invoker = Invoker()
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        firewall_id = invoker.get_result()
+        print(f'Firewall Group ID is: {firewall_id}')
     def _prepare_command_table(self) -> None:
-        self._command_table = {'ls' : self._get_list}
+        self._command_table = {'ls' : self._get_list,
+                               'id' : self._get_id,
+                              }
+
     def run(self, command: str, session: Session, arguments: dict) -> None:
+        self._arguments = arguments
         if command in self._command_table:
             self._command_table[command](session)
         else:
@@ -115,7 +127,12 @@ class ServerEntityBuilder(EntityBuilder):
 
 class FirewallEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
-        super().__init__(subparsers, {'ls': [[]]})
+        super().__init__(subparsers, {'ls': [[],
+                                            ],
+                                      'id': [['"--name"', 'help="Name of the firewall group"'],
+                                            ],
+                                     }
+                        )
     def __call__(self) -> None:
         self._entity = FirewallEntitiy()
         return self._entity

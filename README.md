@@ -14,7 +14,7 @@ This tool currently supports below services and actions of the provider:
       arvancli iaas region ls
       ```
 
-    * List will be appeared in a tabular format with below columns:
+      List will be appeared in a tabular format with below columns:
 
       * Country
       * City
@@ -45,12 +45,18 @@ This tool currently supports below services and actions of the provider:
       arvancli iaas firewall ls
       ```
   
-    * List will be appeared in a tabular format with below columns:
+      List will be appeared in a tabular format with below columns:
   
       * Name
       * Description
       * Real Name
       * Servers
+  
+  * **id** command: get id of specified firewall group
+  
+    ```bash
+    arvancli iaas firewall id --name "{FIREWALL_GROUP_NAME}"
+    ```
 
 ## Usage
 

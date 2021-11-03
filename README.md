@@ -91,7 +91,7 @@ This tool currently supports below services and actions of the provider:
     * **add-rule** command: add rule to the firewall group with specified name
 
       ```bash
-      arvancli iaas firewall add-rules --name "{FIREWALL_GROUP_NAME}" --description "{FIREWALL_RULE_DESCRIPTION}" --direction "{FIREWALL_RULE_DIRECTION}" --cidr "{FIREWALL_RULE_CIDR(s)}" --protocol "{FIREWALL_RULE_PROTOCOL}" --port "{FIREWALL_RULE_PORTS}"
+      arvancli iaas firewall add-rule --name "{FIREWALL_GROUP_NAME}" --description "{FIREWALL_RULE_DESCRIPTION}" --direction "{FIREWALL_RULE_DIRECTION}" --cidr "{FIREWALL_RULE_CIDR(s)}" --protocol "{FIREWALL_RULE_PROTOCOL}" --port "{FIREWALL_RULE_PORTS}"
       ```
 
       *FIREWALL_RULE_DIRECTION* can be:
@@ -110,6 +110,14 @@ This tool currently supports below services and actions of the provider:
       For a port range, *FIREWALL_RULE_PORTS* should be specified in the form of *sport:dport*
 
       For all source IPs or ports, "--cidr" and "--port" arguments can be skipped, respectively
+      
+    * **delete-rule** command: delete rule from the firewall group with specified name
+    
+      ```bash
+      arvancli iaas firewall delete-rule --name "{FIREWALL_GROUP_NAME}" --number "{FIREWAULL_RULE_NUMBER}"
+      ```
+    
+      *FIREWALL_RULE_NUMBER* can be achieved from "list-rules" command
 
 
 ## Usage

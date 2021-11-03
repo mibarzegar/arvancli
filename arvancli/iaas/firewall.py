@@ -140,3 +140,27 @@ class FirewallAddRuleCommand(Command):
                 body["port_to"] = ports[0]
         body["protocol"] = self._receiver.get('protocol')
         self._session.send_request('POST', url, body=json.dumps(body))
+
+class FirewallRuleIdCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = "https://napi.arvancloud.com/ecc/v1/regions/{zone}/securities"
+        self._session.send_request('GET', url)
+        firewalls_json_array = self._session.get_json_response()['data']
+        selected_firewall_json = next(element for element in firewalls_json_array if element['name'] == self._receiver.get('name'))
+        rule_id = selected_firewall_json["rules"][int(self._receiver.get('number'))-1]["id"]
+        return rule_id
+
+class FirewallDeleteRuleCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        id = self._receiver.get('id')
+        raw_url = "https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/securities/security-rules/{rule_id}"
+        url = raw_url.format(rule_id=id)
+        self._session.send_request('DELETE', url)

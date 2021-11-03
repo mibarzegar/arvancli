@@ -57,9 +57,21 @@ class ServerEntitiy:
         self._invoker.execute_command()
         server_status = self._invoker.get_result()
         print(f'Server Status is: {server_status}')
+    def _get_list(self, session: Session) -> None:
+        cmd = ServersListCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        servers_list = self._invoker.get_result()
+        pt = PrettyTable()
+        pt._max_width = {"IP Address(es)" : 70}
+        pt.field_names = servers_list[0].keys()
+        for server in servers_list:
+            pt.add_row(server.values())
+        print(pt)
     def _prepare_command_table(self) -> None:
         self._command_table = {'id'     : self._get_id,
                                'status' : self._get_status,
+                               'ls'     : self._get_list,
                               }
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
@@ -205,6 +217,8 @@ class ServerEntityBuilder(EntityBuilder):
         super().__init__(subparsers, {'id':      [['"--name"', 'help="Name of the server"'],
                                                  ],
                                       'status':  [['"--name"', 'help="Name of the server"'],
+                                                 ],
+                                      'ls'    :  [[],
                                                  ],
                                      }
                         )

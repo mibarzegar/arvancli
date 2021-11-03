@@ -33,3 +33,38 @@ class ServerStatusCommand(Command):
         self._session.send_request('GET', url)
         instance_status = self._session.get_json_response()['data']['status']
         return instance_status
+
+class ServersListCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = 'https://napi.arvancloud.com/ecc/v1/regions/{zone}/servers'
+        self._session.send_request('GET', url)
+        servers_json_array = self._session.get_json_response()["data"]
+        servers_list = []
+        for server in servers_json_array:
+            server_json = {}
+            server_json["Name"] = server["name"]
+            server_json["Status"] = server["status"]
+            server_json["Operating System"] = server["image"]["name"]
+            resouce_desc = server["flavor"]["id"].split("-")
+            server_json["Resource"] = resouce_desc[2] + " vCPU - " + resouce_desc[1] + " GB RAM - " + resouce_desc[3] + " GB Disk"
+            server_json["Username"] = server["image"]["metadata"]["username"]
+            addresses_json_array = server ["addresses"]
+            ips_list = []
+            for network in addresses_json_array:
+                network_ips = addresses_json_array[network]
+                for ip in network_ips:
+                    server_ip = ip["addr"]
+                    if "public" in network:
+                        ips_list.append(f'public:{server_ip}')
+                        string = ",".join(ips_list)
+                        server_json["IP Address(es)"] = string
+                    else:
+                        ips_list.append(f'private:{server_ip}')
+                        string = ",".join(ips_list)
+                        server_json["IP Address(es)"] = string
+            servers_list.append(server_json)
+        return servers_list

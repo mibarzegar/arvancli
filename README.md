@@ -36,7 +36,22 @@ This tool currently supports below services and actions of the provider:
       ```bash
       arvancli iaas server status --name "{SERVER_NAME}"
       ```
-    
+
+    * **list** command: list servers in configured zone
+
+      ```bash
+      arvancli iaas server ls
+      ```
+
+    * List will be appeared in a tabular format with below columns:
+
+      * Name
+      * Status
+      * Operating System
+      * Resource
+      * Username
+      * IP Address(es)
+
   * **firewall** Entitiy
 
     * **ls** command: get list of firewall groups

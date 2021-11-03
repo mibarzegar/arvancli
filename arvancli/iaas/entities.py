@@ -78,11 +78,22 @@ class ServerEntitiy:
         self._invoker.store_command(cmd)
         self._invoker.execute_command()
         print(f'Reboot request sent!')
+    def _poweroff(self, session: Session) -> None:
+        self._receiver.set({'server_name': self._arguments['name']})
+        cmd = ServerIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'server_id': self._invoker.get_result()})
+        cmd = ServerPoweroffCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print(f'Poweroff request sent!')
     def _prepare_command_table(self) -> None:
-        self._command_table = {'id'     : self._get_id,
-                               'status' : self._get_status,
-                               'ls'     : self._get_list,
-                               'reboot' : self._reboot
+        self._command_table = {'id'       : self._get_id,
+                               'status'   : self._get_status,
+                               'ls'       : self._get_list,
+                               'reboot'   : self._reboot,
+                               'poweroff' : self._poweroff
                               }
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
@@ -225,13 +236,15 @@ class RegionEntityBuilder(EntityBuilder):
 
 class ServerEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
-        super().__init__(subparsers, {'id':      [['"--name"', 'help="Name of the server"'],
+        super().__init__(subparsers, {'id'      :      [['"--name"', 'help="Name of the server"'],
                                                  ],
-                                      'status':  [['"--name"', 'help="Name of the server"'],
+                                      'status'  :  [['"--name"', 'help="Name of the server"'],
                                                  ],
-                                      'ls'    :  [[],
+                                      'ls'      :  [[],
                                                  ],
-                                      'reboot':  [['"--name"', 'help="Name of the server"'],
+                                      'reboot'  :  [['"--name"', 'help="Name of the server"'],
+                                                 ],
+                                      'poweroff':  [['"--name"', 'help="Name of the server"'],
                                                  ],
                                      }
                         )

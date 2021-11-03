@@ -109,3 +109,34 @@ class FirewallRulesCommand(Command):
             rules_list.append(rule_json)
         return(rules_list)
 
+class FirewallAddRuleCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        id = self._receiver.get('id')
+        raw_url = "https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/securities/security-rules/{firewall_id}"
+        url = raw_url.format(firewall_id=id)
+        self._session.send_request('GET', url)
+        body = {"description":"",
+                "direction":"",
+                "ips":["any"],
+                "port_from":"",
+                "port_to":"",
+                "protocol":""
+        }
+        body["description"] = self._receiver.get('description')
+        body["direction"] = self._receiver.get('direction')
+        if self._receiver.get('cidr'):
+            cidrs = [cidr.strip() for cidr in self._receiver.get('cidr').split(",")]
+            body["ips"] = cidrs
+        if self._receiver.get('port'):
+            ports = [port.strip() for port in self._receiver.get('port').split(":")]
+            body["port_from"] = ports[0]
+            if len(ports) == 2:
+                body["port_to"] = ports[1]
+            else:
+                body["port_to"] = ports[0]
+        body["protocol"] = self._receiver.get('protocol')
+        self._session.send_request('POST', url, body=json.dumps(body))

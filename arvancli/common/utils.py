@@ -15,6 +15,12 @@ class Session:
             self._response = self._session.delete(url, headers=self._headers)
         else:
            raise ValueError(method)
+        self._check_status()
+    def _check_status(self):
+        try:
+            self._response.raise_for_status()
+        except requests.exceptions.HTTPError:
+            raise Exception(f'Request failed!')
     def get_json_response(self) -> dict:
         return self._response.json()
     def _prepare_headers(self, token: str) -> None:

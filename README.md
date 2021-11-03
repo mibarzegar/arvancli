@@ -66,13 +66,13 @@ This tool currently supports below services and actions of the provider:
 
       **Note:** To Add ArvanCDN Servers firewall group to the list of firewall groups, *FIREWALL_GROUP_NAME* must be set to arCDN  and no description is required.
 
-    * **delete** command: delete security group with specified name
+    * **delete** command: delete firewall group with specified name
 
       ```bash
       arvancli iaas firewall delete --name "{FIREWALL_GROUP_NAME}"
       ```
 
-    * **list-rules** command: list rules inside a security group with specified name
+    * **list-rules** command: list rules inside a firewall group with specified name
 
       ```bash
       arvancli iaas firewall list-rules --name "{FIREWALL_GROUP_NAME}" 
@@ -87,11 +87,34 @@ This tool currently supports below services and actions of the provider:
       * Ports
       * Origin/Destination
       * Access Type
+      
+    * **add-rule** command: add rule to the firewall group with specified name
+
+      ```bash
+      arvancli iaas firewall add-rules --name "{FIREWALL_GROUP_NAME}" --description "{FIREWALL_RULE_DESCRIPTION}" --direction "{FIREWALL_RULE_DIRECTION}" --cidr "{FIREWALL_RULE_CIDR(s)}" --protocol "{FIREWALL_RULE_PROTOCOL}" --port "{FIREWALL_RULE_PORTS}"
+      ```
+
+      *FIREWALL_RULE_DIRECTION* can be:
+
+      - ingress
+      - egress
+
+      *FIREWALL_RULE_PROTOCOL* can be:
+
+      - tcp
+      - udp
+      - *PROTOCOL_NUMBER*. In this way a custom protocol with specified number can be applied for the rule. With custom protocols there is no need for "--port" argument
+
+      For multiple source cidrs, *FIREWALL_RULE_CIDR* can be written in the form of *cidr1,cidr2,...*
+
+      For a port range, *FIREWALL_RULE_PORTS* should be specified in the form of *sport:dport*
+
+      For all source IPs or ports, "--cidr" and "--port" arguments can be skipped, respectively
 
 
 ## Usage
 
-1. First of all use python3.9 to perevent future problems!
+1. First of all use python3.9 to prevent future problems!
 
 2. Then install required packages and run setup script:
 

@@ -128,12 +128,25 @@ class FirewallEntitiy:
         for rule in rules_list:
             pt.add_row(rule.values())
         print(pt)
+    def _add_rule(self, session: Session) -> None:
+        receiver = Receiver(self._arguments)
+        cmd = FirewallIdCommand(receiver, session)
+        invoker = Invoker()
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        self._arguments['id'] = invoker.get_result()
+        receiver = Receiver(self._arguments)
+        cmd = FirewallAddRuleCommand(receiver, session)
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        print(f'Firewall Rule added successfully')
     def _prepare_command_table(self) -> None:
-        self._command_table = {'ls'     : self._get_list,
-                               'id'     : self._get_id,
-                               'create' : self._create,
-                               'delete' : self._delete,
-                               'list-rules'  : self._list_rules
+        self._command_table = {'ls'          : self._get_list,
+                               'id'          : self._get_id,
+                               'create'      : self._create,
+                               'delete'      : self._delete,
+                               'list-rules'  : self._list_rules,
+                               'add-rule'    : self._add_rule
                               }
 
     def run(self, command: str, session: Session, arguments: dict) -> None:
@@ -174,6 +187,13 @@ class FirewallEntityBuilder(EntityBuilder):
                                       'delete'     : [['"--name"'       , 'help="Name of the firewall group"'],
                                                      ],
                                       'list-rules' : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                     ],
+                                      'add-rule'  : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                      ['"--description"', 'help="Description of the rule"'],
+                                                      ['"--direction"'  , 'help="Direction of the rule."'],
+                                                      ['"--cidr"'       , 'help="CIDR or list of CIDRs that rule will be applied to. Multiple CIDRs must be seperated with ,"'],
+                                                      ['"--protocol"'   , 'help="Protocol of the rule."'],
+                                                      ['"--port"'       , 'help="Port or port range of the rule. A range must be specified such as SPORT:DPORT"'],
                                                      ],
                                      }
                         )

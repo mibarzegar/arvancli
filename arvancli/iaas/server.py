@@ -68,3 +68,13 @@ class ServersListCommand(Command):
                         server_json["IP Address(es)"] = string
             servers_list.append(server_json)
         return servers_list
+
+class ServerRebootCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/servers/{server_id}/reboot'
+        url = raw_url.format(server_id=self._receiver.get('server_id'))
+        self._session.send_request('POST', url)

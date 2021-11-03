@@ -51,7 +51,13 @@ This tool currently supports below services and actions of the provider:
       * Resource
       * Username
       * IP Address(es)
+      
+    * **reboot** command: reboot specified server
 
+      ```bash
+      arvancli iaas server reboot --name "{SERVER_NAME}"
+      ```
+  
   * **firewall** Entitiy
 
     * **ls** command: get list of firewall groups
@@ -59,9 +65,9 @@ This tool currently supports below services and actions of the provider:
       ```Bash
       arvancli iaas firewall ls
       ```
-
+  
       List will be appeared in a tabular format with below columns:
-
+  
       * Name
       * Description
       * Real Name
@@ -78,7 +84,7 @@ This tool currently supports below services and actions of the provider:
       ```bash
       arvancli iaas firewall create --name "{FIREWALL_GROUP_NAME}" --description "{FIREWALL_GROUP_DESCRIPTION}"
       ```
-
+  
       **Note:** To Add ArvanCDN Servers firewall group to the list of firewall groups, *FIREWALL_GROUP_NAME* must be set to arCDN  and no description is required.
 
     * **delete** command: delete firewall group with specified name
@@ -92,9 +98,9 @@ This tool currently supports below services and actions of the provider:
       ```bash
       arvancli iaas firewall list-rules --name "{FIREWALL_GROUP_NAME}" 
       ```
-
+  
       List will be appeared in a tabular format with below columns:
-
+  
       * \#
       * Type
       * Direction
@@ -108,9 +114,9 @@ This tool currently supports below services and actions of the provider:
       ```bash
       arvancli iaas firewall add-rule --name "{FIREWALL_GROUP_NAME}" --description "{FIREWALL_RULE_DESCRIPTION}" --direction "{FIREWALL_RULE_DIRECTION}" --cidr "{FIREWALL_RULE_CIDR(s)}" --protocol "{FIREWALL_RULE_PROTOCOL}" --port "{FIREWALL_RULE_PORTS}"
       ```
-
+  
       *FIREWALL_RULE_DIRECTION* can be:
-
+  
       - ingress
       - egress
 
@@ -119,11 +125,11 @@ This tool currently supports below services and actions of the provider:
       - tcp
       - udp
       - *PROTOCOL_NUMBER*. In this way a custom protocol with specified number can be applied for the rule. With custom protocols there is no need for "--port" argument
-
+  
       For multiple source cidrs, *FIREWALL_RULE_CIDR* can be written in the form of *cidr1,cidr2,...*
-
+  
       For a port range, *FIREWALL_RULE_PORTS* should be specified in the form of *sport:dport*
-
+  
       For all source IPs or ports, "--cidr" and "--port" arguments can be skipped, respectively
       
     * **delete-rule** command: delete rule from the firewall group with specified name

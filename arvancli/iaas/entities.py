@@ -68,10 +68,21 @@ class ServerEntitiy:
         for server in servers_list:
             pt.add_row(server.values())
         print(pt)
+    def _reboot(self, session: Session) -> None:
+        self._receiver.set({'server_name': self._arguments['name']})
+        cmd = ServerIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'server_id': self._invoker.get_result()})
+        cmd = ServerRebootCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print(f'Reboot request sent!')
     def _prepare_command_table(self) -> None:
         self._command_table = {'id'     : self._get_id,
                                'status' : self._get_status,
                                'ls'     : self._get_list,
+                               'reboot' : self._reboot
                               }
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
@@ -219,6 +230,8 @@ class ServerEntityBuilder(EntityBuilder):
                                       'status':  [['"--name"', 'help="Name of the server"'],
                                                  ],
                                       'ls'    :  [[],
+                                                 ],
+                                      'reboot':  [['"--name"', 'help="Name of the server"'],
                                                  ],
                                      }
                         )

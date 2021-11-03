@@ -37,9 +37,9 @@ class FirewallIdCommand(Command):
         self._session.send_request('GET', url)
         firewalls_json_array = self._session.get_json_response()["data"]
         try:
-            selected_firewall_json = next(element for element in firewalls_json_array if element['name'] == self._receiver.get('name'))
+            selected_firewall_json = next(element for element in firewalls_json_array if element['name'] == self._receiver.get('firewall_name'))
         except StopIteration:
-            print(f'{self._receiver.get("name")} not found!')
+            print(f'{self._receiver.get("firewall_name")} not found!')
             sys.exit(1)
         firewall_id = selected_firewall_json['id']
         return(firewall_id)
@@ -50,16 +50,16 @@ class FirewallCreateCommand(Command):
         self._session = session
         self.result = None
     def execute(self) -> None:
-        if self._receiver.get('name') == "arCDN":
+        if self._receiver.get('firewall_name') == "arCDN":
             url = "https://napi.arvancloud.com/ecc/v1/regions/{zone}/securities/cdn"
         else:
             url = "https://napi.arvancloud.com/ecc/v1/regions/{zone}/securities"
-        if self._receiver.get('name') != "arCDN":
+        if self._receiver.get('firewall_name') != "arCDN":
             body = { "name": "",
                      "description": ""
                    }
-            body["name"] = self._receiver.get('name')
-            body["description"] = self._receiver.get('description')
+            body["name"] = self._receiver.get('firewall_name')
+            body["description"] = self._receiver.get('firewall_description')
             self._session.send_request('POST', url, body=json.dumps(body))
             firewall_details = self._session.get_json_response()["data"]
             if firewall_details["id"] == None:
@@ -67,7 +67,6 @@ class FirewallCreateCommand(Command):
                 sys.exit(1)
         else:
             self._session.send_request('POST', url)
-        return(self._receiver.get('name'))
 
 class FirewallDeleteCommand(Command):
     def __init__(self, receiver: Receiver, session: Session) -> None:
@@ -75,9 +74,8 @@ class FirewallDeleteCommand(Command):
         self._session = session
         self.result = None
     def execute(self) -> None:
-        id = self._receiver.get('id')
         raw_url = "https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/securities/{firewall_id}"
-        url = raw_url.format(firewall_id=id)
+        url = raw_url.format(firewall_id=self._receiver.get('firewall_id'))
         self._session.send_request('DELETE', url)
 
 class FirewallRulesCommand(Command):
@@ -91,9 +89,9 @@ class FirewallRulesCommand(Command):
         rules_list = []
         firewalls_json_array = self._session.get_json_response()["data"]
         try:
-            selected_firewall_json = next(element for element in firewalls_json_array if element['name'] == self._receiver.get('name'))
+            selected_firewall_json = next(element for element in firewalls_json_array if element['name'] == self._receiver.get('firewall_name'))
         except StopIteration:
-            print(f'{self._receiver.get("name")} not found!')
+            print(f'{self._receiver.get("firewall_name")} not found!')
             sys.exit(1)
         number = 0
         for rule in selected_firewall_json["rules"]:
@@ -115,9 +113,8 @@ class FirewallAddRuleCommand(Command):
         self._session = session
         self.result = None
     def execute(self) -> None:
-        id = self._receiver.get('id')
         raw_url = "https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/securities/security-rules/{firewall_id}"
-        url = raw_url.format(firewall_id=id)
+        url = raw_url.format(firewall_id=self._receiver.get('firewall_id'))
         self._session.send_request('GET', url)
         body = {"description":"",
                 "direction":"",
@@ -126,19 +123,19 @@ class FirewallAddRuleCommand(Command):
                 "port_to":"",
                 "protocol":""
         }
-        body["description"] = self._receiver.get('description')
-        body["direction"] = self._receiver.get('direction')
-        if self._receiver.get('cidr'):
-            cidrs = [cidr.strip() for cidr in self._receiver.get('cidr').split(",")]
+        body["description"] = self._receiver.get('rule_description')
+        body["direction"] = self._receiver.get('rule_direction')
+        if self._receiver.get('rule_cidr'):
+            cidrs = [cidr.strip() for cidr in self._receiver.get('rule_cidr').split(",")]
             body["ips"] = cidrs
-        if self._receiver.get('port'):
-            ports = [port.strip() for port in self._receiver.get('port').split(":")]
+        if self._receiver.get('rule_port'):
+            ports = [port.strip() for port in self._receiver.get('rule_port').split(":")]
             body["port_from"] = ports[0]
             if len(ports) == 2:
                 body["port_to"] = ports[1]
             else:
                 body["port_to"] = ports[0]
-        body["protocol"] = self._receiver.get('protocol')
+        body["protocol"] = self._receiver.get('rule_protocol')
         self._session.send_request('POST', url, body=json.dumps(body))
 
 class FirewallRuleIdCommand(Command):
@@ -150,8 +147,8 @@ class FirewallRuleIdCommand(Command):
         url = "https://napi.arvancloud.com/ecc/v1/regions/{zone}/securities"
         self._session.send_request('GET', url)
         firewalls_json_array = self._session.get_json_response()['data']
-        selected_firewall_json = next(element for element in firewalls_json_array if element['name'] == self._receiver.get('name'))
-        rule_id = selected_firewall_json["rules"][int(self._receiver.get('number'))-1]["id"]
+        selected_firewall_json = next(element for element in firewalls_json_array if element['name'] == self._receiver.get('firewall_name'))
+        rule_id = selected_firewall_json["rules"][int(self._receiver.get('rule_number'))-1]["id"]
         return rule_id
 
 class FirewallDeleteRuleCommand(Command):
@@ -160,9 +157,8 @@ class FirewallDeleteRuleCommand(Command):
         self._session = session
         self.result = None
     def execute(self) -> None:
-        id = self._receiver.get('id')
         raw_url = "https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/securities/security-rules/{rule_id}"
-        url = raw_url.format(rule_id=id)
+        url = raw_url.format(rule_id=self._receiver.get('rule_id'))
         self._session.send_request('DELETE', url)
 
 class FirewallAttachServerCommand(Command):
@@ -171,9 +167,8 @@ class FirewallAttachServerCommand(Command):
         self._session = session
         self.result = None
     def execute(self) -> None:
-        id = self._receiver.get('server_id')
         raw_url = "https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/servers/{server_id}/add-security-group"
-        url = raw_url.format(server_id=id)
+        url = raw_url.format(server_id=self._receiver.get('server_id'))
         body = {"security_group_id":""}
         body["security_group_id"] = self._receiver.get('firewall_id')
         self._session.send_request('POST', url, body=json.dumps(body))
@@ -184,9 +179,8 @@ class FirewallDetachServerCommand(Command):
         self._session = session
         self.result = None
     def execute(self) -> None:
-        id = self._receiver.get('server_id')
         raw_url = "https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/servers/{server_id}/remove-security-group"
-        url = raw_url.format(server_id=id)
+        url = raw_url.format(server_id=self._receiver.get('server_id'))
         body = {"security_group_id":""}
         body["security_group_id"] = self._receiver.get('firewall_id')
         self._session.send_request('POST', url, body=json.dumps(body))

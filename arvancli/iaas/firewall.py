@@ -164,3 +164,29 @@ class FirewallDeleteRuleCommand(Command):
         raw_url = "https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/securities/security-rules/{rule_id}"
         url = raw_url.format(rule_id=id)
         self._session.send_request('DELETE', url)
+
+class FirewallAttachServerCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        id = self._receiver.get('server_id')
+        raw_url = "https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/servers/{server_id}/add-security-group"
+        url = raw_url.format(server_id=id)
+        body = {"security_group_id":""}
+        body["security_group_id"] = self._receiver.get('firewall_id')
+        self._session.send_request('POST', url, body=json.dumps(body))
+
+class FirewallDetachServerCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        id = self._receiver.get('server_id')
+        raw_url = "https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/servers/{server_id}/remove-security-group"
+        url = raw_url.format(server_id=id)
+        body = {"security_group_id":""}
+        body["security_group_id"] = self._receiver.get('firewall_id')
+        self._session.send_request('POST', url, body=json.dumps(body))

@@ -153,14 +153,58 @@ class FirewallEntitiy:
         invoker.store_command(cmd)
         invoker.execute_command()
         print(f'Firewall Rule deleted successfully')
+    def _attach_server(self, session: Session) -> None:
+        arguments = {}
+        arguments['name'] = self._arguments['name']
+        receiver = Receiver(arguments)
+        cmd = FirewallIdCommand(receiver, session)
+        invoker = Invoker()
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        arguments['firewall_id'] = invoker.get_result()
+        arguments['name'] = self._arguments['server']
+        receiver = Receiver(arguments)
+        cmd = ServerIdCommand(receiver, session)
+        invoker = Invoker()
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        arguments['server_id'] = invoker.get_result()
+        receiver = Receiver(arguments)
+        cmd = FirewallAttachServerCommand(receiver, session)
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        print(f'Server attached successfully')
+    def _detach_server(self, session: Session) -> None:
+        arguments = {}
+        arguments['name'] = self._arguments['name']
+        receiver = Receiver(arguments)
+        cmd = FirewallIdCommand(receiver, session)
+        invoker = Invoker()
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        arguments['firewall_id'] = invoker.get_result()
+        arguments['name'] = self._arguments['server']
+        receiver = Receiver(arguments)
+        cmd = ServerIdCommand(receiver, session)
+        invoker = Invoker()
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        arguments['server_id'] = invoker.get_result()
+        receiver = Receiver(arguments)
+        cmd = FirewallDetachServerCommand(receiver, session)
+        invoker.store_command(cmd)
+        invoker.execute_command()
+        print(f'Server detached successfully')
     def _prepare_command_table(self) -> None:
-        self._command_table = {'ls'          : self._get_list,
-                               'id'          : self._get_id,
-                               'create'      : self._create,
-                               'delete'      : self._delete,
-                               'list-rules'  : self._list_rules,
-                               'add-rule'    : self._add_rule,
-                               'delete-rule' : self._delete_rule,
+        self._command_table = {'ls'            : self._get_list,
+                               'id'            : self._get_id,
+                               'create'        : self._create,
+                               'delete'        : self._delete,
+                               'list-rules'    : self._list_rules,
+                               'add-rule'      : self._add_rule,
+                               'delete-rule'   : self._delete_rule,
+                               'attach-server' : self._attach_server,
+                               'detach-server' : self._detach_server,
                               }
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
@@ -190,27 +234,33 @@ class ServerEntityBuilder(EntityBuilder):
 
 class FirewallEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
-        super().__init__(subparsers, {'ls'          : [[],
-                                                      ],
-                                      'id'          : [['"--name"'       , 'help="Name of the firewall group"'],
-                                                      ],
-                                      'create'      : [['"--name"'       , 'help="Name of the firewall group"'],
-                                                       ['"--description"', 'help="Description of the firewall group"'],
-                                                      ],
-                                      'delete'      : [['"--name"'       , 'help="Name of the firewall group"'],
-                                                      ],
-                                      'list-rules'  : [['"--name"'       , 'help="Name of the firewall group"'],
-                                                      ],
-                                      'add-rule'    : [['"--name"'       , 'help="Name of the firewall group"'],
-                                                       ['"--description"', 'help="Description of the rule"'],
-                                                       ['"--direction"'  , 'help="Direction of the rule."'],
-                                                       ['"--cidr"'       , 'help="CIDR or list of CIDRs that rule will be applied to. Multiple CIDRs must be seperated with ,"'],
-                                                       ['"--protocol"'   , 'help="Protocol of the rule."'],
-                                                       ['"--port"'       , 'help="Port or port range of the rule. A range must be specified such as SPORT:DPORT"'],
-                                                      ],
-                                      'delete-rule' : [['"--name"'       , 'help="Name of the firewall group"'],
-                                                       ['"--number"'     , 'help="The row number of the specified rule"'],
-                                                      ]
+        super().__init__(subparsers, {'ls'            : [[],
+                                                        ],
+                                      'id'            : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                        ],
+                                      'create'        : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                         ['"--description"', 'help="Description of the firewall group"'],
+                                                        ],
+                                      'delete'        : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                        ],
+                                      'list-rules'    : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                        ],
+                                      'add-rule'      : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                         ['"--description"', 'help="Description of the rule"'],
+                                                         ['"--direction"'  , 'help="Direction of the rule."'],
+                                                         ['"--cidr"'       , 'help="CIDR or list of CIDRs that rule will be applied to. Multiple CIDRs must be seperated with ,"'],
+                                                         ['"--protocol"'   , 'help="Protocol of the rule."'],
+                                                         ['"--port"'       , 'help="Port or port range of the rule. A range must be specified such as SPORT:DPORT"'],
+                                                        ],
+                                      'delete-rule'   : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                         ['"--number"'     , 'help="The row number of the specified rule"'],
+                                                        ],
+                                      'attach-server' : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                         ['"--server"'     , 'help="Name of the desired server to be attached"'],
+                                                        ],
+                                      'detach-server' : [['"--name"'       , 'help="Name of the firewall group"'],
+                                                         ['"--server"'     , 'help="Name of the desired server to be detached"'],
+                                                        ],
                                      } 
                         )
     def __call__(self) -> None:

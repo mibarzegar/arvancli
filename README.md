@@ -118,6 +118,19 @@ This tool currently supports below services and actions of the provider:
       ```
     
       *FIREWALL_RULE_NUMBER* can be achieved from "list-rules" command
+    
+    * **attach-server** command: attach server to the firewall group with specified name
+    
+      ```bash
+      arvancli iaas firewall attach-server --name "{FIREWALL_GROUP_NAME}" --server "{SERVER_NAME}"
+      ```
+    
+    * **detach-server** command:  detach server from the firewall group with specified name
+    
+      ```bash
+      arvancli iaas firewall detach-server --name "{FIREWALL_GROUP_NAME}" --server "{SERVER_NAME}"
+      ```
+    
 
 
 ## Usage

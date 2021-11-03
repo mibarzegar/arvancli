@@ -88,3 +88,13 @@ class ServerPoweroffCommand(Command):
         raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/servers/{server_id}/power-off'
         url = raw_url.format(server_id=self._receiver.get('server_id'))
         self._session.send_request('POST', url)
+
+class ServerPoweronCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/servers/{server_id}/power-on'
+        url = raw_url.format(server_id=self._receiver.get('server_id'))
+        self._session.send_request('POST', url)

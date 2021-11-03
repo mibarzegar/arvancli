@@ -64,6 +64,13 @@ This tool currently supports below services and actions of the provider:
       arvancli iaas server poweroff --name "{SERVER_NAME}"
       ```
 
+
+    * **poweron** command: poweron specified server
+
+      ```bash
+      arvancli iaas server poweron --name "{SERVER_NAME}"
+      ```
+
   * **firewall** Entitiy
 
     * **ls** command: get list of firewall groups

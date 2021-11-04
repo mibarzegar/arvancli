@@ -255,8 +255,21 @@ class NetworkEntitiy:
         for region in regions_list:
             pt.add_row(region.values())
         print(pt)
+    def _get_servers(self, session: Session) -> None:
+        self._receiver.set({'network_name': self._arguments['name']})
+        cmd = NetworkServersListCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        regions_list = self._invoker.get_result()
+        pt = PrettyTable()
+        pt.field_names = regions_list[0].keys()
+        for region in regions_list:
+            pt.add_row(region.values())
+        print(pt)
     def _prepare_command_table(self) -> None:
-        self._command_table = {'ls' : self._get_list}
+        self._command_table = {'ls'           : self._get_list,
+                               'list-servers' : self._get_servers,
+                              }
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
         if command in self._command_table:
@@ -328,7 +341,12 @@ class FirewallEntityBuilder(EntityBuilder):
 
 class NetworkEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
-        super().__init__(subparsers, {'ls': [[]]})
+        super().__init__(subparsers, {'ls'           : [[],
+                                                       ],
+                                      'list-servers' : [['"--name"', 'help="Name of the network"'],
+                                                       ],
+                                     }
+                        )
     def __call__(self) -> None:
         self._entity = NetworkEntitiy()
         return self._entity

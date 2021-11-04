@@ -180,6 +180,21 @@ This tool currently supports below services and actions of the provider:
       - Subnet Name
       - Subnet CIDR
       - Server(s)
+      
+    - **list-servers** command: get list of servers in the specified network
+    
+      ```Bash
+      arvancli iaas network list-servers --name "{NETWORK_NAME}"
+      ```
+    
+      List will be appeared in a tabular format with below columns:
+    
+      -  Name
+      - IP Address
+      - MAC Address
+      - Port Security
+      - PTR record: This column is only available for public networks
+      - Float IP: This column is only available for private networks
 
 ## Usage
 

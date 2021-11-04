@@ -4,6 +4,7 @@ from arvancli.common.invoker import Invoker
 from arvancli.iaas.region import *
 from arvancli.iaas.server import *
 from arvancli.iaas.firewall import *
+from arvancli.iaas.network import *
 from prettytable import PrettyTable
 from arvancli.common.utils import Session
 from argparse import _SubParsersAction
@@ -154,7 +155,6 @@ class FirewallEntitiy:
         cmd = FirewallDeleteCommand(self._receiver, session)
         self._invoker.store_command(cmd)
         self._invoker.execute_command()
-        firewall_name = self._invoker.get_result()
         print(f'Firewall Group deleted successfully')
     def _list_rules(self, session: Session) -> None:
         self._receiver.set({'firewall_name' : self._arguments['name']})
@@ -220,6 +220,7 @@ class FirewallEntitiy:
         cmd = FirewallDetachServerCommand(self._receiver, session)
         self._invoker.store_command(cmd)
         self._invoker.execute_command()
+        print(f'Server detached successfully')
     def _prepare_command_table(self) -> None:
         self._command_table = {'ls'            : self._get_list,
                                'id'            : self._get_id,
@@ -231,6 +232,31 @@ class FirewallEntitiy:
                                'attach-server' : self._attach_server,
                                'detach-server' : self._detach_server,
                               }
+    def run(self, command: str, session: Session, arguments: dict) -> None:
+        self._arguments = arguments
+        if command in self._command_table:
+            self._command_table[command](session)
+        else:
+            raise ValueError(key)
+
+class NetworkEntitiy:
+    def __init__(self) -> None:
+        self._prepare_command_table()
+        self._arguments = None
+        self._receiver = Receiver()
+        self._invoker = Invoker()
+    def _get_list(self, session: Session) -> None:
+        cmd = NetworkListCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        regions_list = self._invoker.get_result()
+        pt = PrettyTable()
+        pt.field_names = regions_list[0].keys()
+        for region in regions_list:
+            pt.add_row(region.values())
+        print(pt)
+    def _prepare_command_table(self) -> None:
+        self._command_table = {'ls' : self._get_list}
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
         if command in self._command_table:
@@ -298,4 +324,11 @@ class FirewallEntityBuilder(EntityBuilder):
                         )
     def __call__(self) -> None:
         self._entity = FirewallEntitiy()
+        return self._entity
+
+class NetworkEntityBuilder(EntityBuilder):
+    def __init__(self, subparsers: _SubParsersAction) -> None:
+        super().__init__(subparsers, {'ls': [[]]})
+    def __call__(self) -> None:
+        self._entity = NetworkEntitiy()
         return self._entity

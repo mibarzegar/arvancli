@@ -266,9 +266,28 @@ class NetworkEntitiy:
         for region in regions_list:
             pt.add_row(region.values())
         print(pt)
+    def _add_ptr(self, session: Session) -> None:
+        self._receiver.set({'ptr_ip'  : self._arguments['ip'],
+                            'ptr_domain' : self._arguments['domain'],
+                           }
+                          )
+        cmd = NetworkAddPtrCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print('PTR record added successfully')
+    def _delete_ptr(self, session: Session) -> None:
+        self._receiver.set({'ptr_ip'  : self._arguments['ip'],
+                           }
+                          )
+        cmd = NetworkDeletePtrCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print('PTR record removed successfully')
     def _prepare_command_table(self) -> None:
         self._command_table = {'ls'           : self._get_list,
                                'list-servers' : self._get_servers,
+                               'add-ptr'      : self._add_ptr,
+                               'delete-ptr'   : self._delete_ptr,
                               }
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
@@ -343,7 +362,12 @@ class NetworkEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
         super().__init__(subparsers, {'ls'           : [[],
                                                        ],
-                                      'list-servers' : [['"--name"', 'help="Name of the network"'],
+                                      'list-servers' : [['"--name"'   , 'help="Name of the network"'],
+                                                       ],
+                                      'add-ptr'      : [['"--ip"'     , 'help="IP address that the PTR record will be assigned to"'],
+                                                        ['"--domain"' , 'help="Domain of the PTR record"'],
+                                                       ],
+                                      'delete-ptr'   : [['"--ip"'     , 'help="IP address that the PTR record will be removed from"'],
                                                        ],
                                      }
                         )

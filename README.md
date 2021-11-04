@@ -195,6 +195,18 @@ This tool currently supports below services and actions of the provider:
       - Port Security
       - PTR record: This column is only available for public networks
       - Float IP: This column is only available for private networks
+    
+    - **add-ptr** command: add a PTR record to the specified ip address
+    
+      ```Bash
+      arvancli iaas network add-ptr --ip "{IP_ADDRESS}" --domain "{PTR_DOMAIN}"
+      ```
+    
+    - **delete-ptr** command: Remove a PTR record from specified ip address
+    
+      ```Bash
+      arvancli iaas network delete-ptr --ip "{IP_ADDRESS}"
+      ```
 
 ## Usage
 

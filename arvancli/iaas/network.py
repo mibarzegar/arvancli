@@ -60,3 +60,25 @@ class NetworkServersListCommand(Command):
                             server_json['Float IP'] = ip['float_ip'] if ip['float_ip'] else ''
                         servers_list.append(server_json)
         return servers_list
+
+class NetworkAddPtrCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = 'https://napi.arvancloud.com/ecc/v1/regions/{zone}/ptr'
+        body = {'domain' : self._receiver.get('ptr_domain'),
+                'ip'     : self._receiver.get('ptr_ip'),
+               }
+        self._session.send_request('POST', url, body=json.dumps(body))
+
+class NetworkDeletePtrCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/ptr/{ptr_ip}'
+        url = raw_url.format(ptr_ip=self._receiver.get('ptr_ip'))
+        self._session.send_request('DELETE', url)

@@ -70,12 +70,16 @@ This tool currently supports below services and actions of the provider:
       arvancli iaas server poweron --name "{SERVER_NAME}"
       ```
     
-  * * **delete** command: delete specified server
+    * **delete** command: delete specified server
   
         ```Bash
         arvancli iaas server delete --name "{SERVER_NAME}"
         ```
-  
+    * **resize** command: resize specified server
+
+        ```Bash
+        arvancli iaas server resize --name "{SERVER_NAME}" --resource "{RAM}:{CORES}:{DISK}" 
+        ```
   * **firewall** Entitiy
   
       * **ls** command: get list of firewall groups

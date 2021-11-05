@@ -109,6 +109,17 @@ class ServerEntitiy:
         self._invoker.store_command(cmd)
         self._invoker.execute_command()
         print(f'server deleted successfully!')
+    def _resize(self, session: Session) -> None:
+        self._receiver.set({'server_name': self._arguments['name']})
+        self._receiver.set({'resource'   : self._arguments['resource']})
+        cmd = ServerIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'server_id': self._invoker.get_result()})
+        cmd = ServerResizeCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print(f'Resize request sent!')
     def _prepare_command_table(self) -> None:
         self._command_table = {'id'       : self._get_id,
                                'status'   : self._get_status,
@@ -116,7 +127,8 @@ class ServerEntitiy:
                                'reboot'   : self._reboot,
                                'poweroff' : self._poweroff,
                                'poweron'  : self._poweron,
-                               'delete'   : self._delete
+                               'delete'   : self._delete,
+                               'resize'   : self._resize
                               }
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
@@ -329,6 +341,9 @@ class ServerEntityBuilder(EntityBuilder):
                                       'poweron' :  [['"--name"', 'help="Name of the server"'],
                                                  ],
                                       'delete'  :  [['"--name"'   , 'help="Name of the server"'],
+                                                 ],
+                                      'resize'  :  [['"--name"'   , 'help="Name of the server"'],
+                                                   ['"--resource"', 'help="New resources of the desired server"'],
                                                  ],
                                      }
                         )

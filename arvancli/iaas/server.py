@@ -108,3 +108,15 @@ class ServerDeleteCommand(Command):
         raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/servers/{server_id}'
         url = raw_url.format(server_id=self._receiver.get('server_id'))
         self._session.send_request('DELETE', url)
+
+class ServerResizeCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/servers/{server_id}/resize'
+        url = raw_url.format(server_id=self._receiver.get('server_id'))
+        body = {}
+        body['flavor_id'] = f'g1-{self._receiver.get("resource").replace(":", "-")}'
+        self._session.send_request('POST', url, body=json.dumps(body))

@@ -82,3 +82,43 @@ class NetworkDeletePtrCommand(Command):
         raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/ptr/{ptr_ip}'
         url = raw_url.format(ptr_ip=self._receiver.get('ptr_ip'))
         self._session.send_request('DELETE', url)
+
+class NetworkAttachPublicCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/servers/{server_id}/add-public-ip'
+        url = raw_url.format(server_id=self._receiver.get('server_id'))
+        body = {}
+        self._session.send_request('POST', url, body=json.dumps(body))
+
+class NetworkPortIdCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = 'https://napi.arvancloud.com/ecc/v1/regions/{zone}/networks'
+        self._session.send_request('GET', url)
+        networks_json_array = self._session.get_json_response()["data"]
+        networks_list = []
+        for network in networks_json_array:
+            for subnet in network['subnets']:
+                for server in subnet['servers']:
+                    for ip in server['ips']:
+                        if ip['ip'] == self._receiver.get('public_ip'):
+                            return ip['port_id']
+
+class NetworkDetachPublicCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/networks/{port_id}/detach'
+        url = raw_url.format(port_id=self._receiver.get('port_id'))
+        body = {}
+        body['server_id'] = self._receiver.get('server_id')
+        self._session.send_request('PATCH', url, body=json.dumps(body))

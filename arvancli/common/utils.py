@@ -13,6 +13,8 @@ class Session:
             self._response = self._session.post(url, headers=self._headers, data=kwargs.get('body'))
         elif method == 'DELETE':
             self._response = self._session.delete(url, headers=self._headers)
+        elif method == 'PATCH':
+            self._response = self._session.patch(url, headers=self._headers, data=kwargs.get('body'))
         else:
            raise ValueError(method)
         self._check_status()

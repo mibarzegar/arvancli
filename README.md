@@ -217,6 +217,18 @@ This tool currently supports below services and actions of the provider:
       ```Bash
       arvancli iaas network delete-ptr --ip "{IP_ADDRESS}"
       ```
+      
+    - **attach-public** command: Attach a new public IP to specified instance
+    
+      ```Bash
+      arvancli iaas network attach-public --name "{SERVER_NAME}"
+      ```
+    
+    - **detach-public** command: Detach specified public IP from the instance
+    
+      ```Bash
+      arvancli iaas network detach-public --name "{SERVER_NAME}" --ip "{IP_ADDRESS}"
+      ```
 
 ## Usage
 

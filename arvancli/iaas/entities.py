@@ -306,11 +306,38 @@ class NetworkEntitiy:
         self._invoker.store_command(cmd)
         self._invoker.execute_command()
         print('PTR record removed successfully')
+    def _attach_public(self, session: Session) -> None:
+        self._receiver.set({'server_name' : self._arguments['name']})
+        cmd = ServerIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'server_id' : self._invoker.get_result()})
+        cmd = NetworkAttachPublicCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print(f'Public IP attached successfully')
+    def _detach_public(self, session: Session) -> None:
+        self._receiver.set({'public_ip'   : self._arguments['ip']})
+        self._receiver.set({'server_name' : self._arguments['name']})
+        cmd = ServerIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'server_id' : self._invoker.get_result()})
+        cmd = NetworkPortIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'port_id' : self._invoker.get_result()})
+        cmd = NetworkDetachPublicCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print(f'Public IP detached successfully')
     def _prepare_command_table(self) -> None:
         self._command_table = {'ls'           : self._get_list,
                                'list-servers' : self._get_servers,
                                'add-ptr'      : self._add_ptr,
                                'delete-ptr'   : self._delete_ptr,
+                               'attach-public' : self._attach_public,
+                               'detach-public' : self._detach_public,
                               }
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
@@ -388,15 +415,20 @@ class FirewallEntityBuilder(EntityBuilder):
 
 class NetworkEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
-        super().__init__(subparsers, {'ls'           : [[],
-                                                       ],
-                                      'list-servers' : [['"--name"'   , 'help="Name of the network"'],
-                                                       ],
-                                      'add-ptr'      : [['"--ip"'     , 'help="IP address that the PTR record will be assigned to"'],
+        super().__init__(subparsers, {'ls'            : [[],
+                                                        ],
+                                      'list-servers'  : [['"--name"'   , 'help="Name of the network"'],
+                                                        ],
+                                      'add-ptr'       : [['"--ip"'     , 'help="IP address that the PTR record will be assigned to"'],
                                                         ['"--domain"' , 'help="Domain of the PTR record"'],
-                                                       ],
-                                      'delete-ptr'   : [['"--ip"'     , 'help="IP address that the PTR record will be removed from"'],
-                                                       ],
+                                                        ],
+                                      'delete-ptr'    : [['"--ip"'     , 'help="IP address that the PTR record will be removed from"'],
+                                                        ],
+                                      'attach-public' : [['"--name"'   , 'help="Name of desired server"'],
+                                                        ],
+                                      'detach-public' : [['"--ip"'     , 'help="Public IP address that will be detached from server"'],
+                                                         ['"--name"'   , 'help="Name of desired server"']
+                                                        ],
                                      }
                         )
     def __call__(self) -> None:

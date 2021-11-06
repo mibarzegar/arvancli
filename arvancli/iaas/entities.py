@@ -120,6 +120,17 @@ class ServerEntitiy:
         self._invoker.store_command(cmd)
         self._invoker.execute_command()
         print(f'Resize request sent!')
+    def _rename(self, session: Session) -> None:
+        self._receiver.set({'server_name': self._arguments['name']})
+        self._receiver.set({'new_server_name': self._arguments['new_name']})
+        cmd = ServerIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'server_id': self._invoker.get_result()})
+        cmd = ServerRenameCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print(f'Rename request sent!')
     def _prepare_command_table(self) -> None:
         self._command_table = {'id'       : self._get_id,
                                'status'   : self._get_status,
@@ -128,7 +139,8 @@ class ServerEntitiy:
                                'poweroff' : self._poweroff,
                                'poweron'  : self._poweron,
                                'delete'   : self._delete,
-                               'resize'   : self._resize
+                               'resize'   : self._resize,
+                               'rename'   : self._rename
                               }
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
@@ -355,23 +367,26 @@ class RegionEntityBuilder(EntityBuilder):
 
 class ServerEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
-        super().__init__(subparsers, {'id'      :      [['"--name"', 'help="Name of the server"'],
+        super().__init__(subparsers, {'id'      :  [['"--name"'   , 'help="Name of the server"'],
                                                  ],
-                                      'status'  :  [['"--name"', 'help="Name of the server"'],
+                                      'status'  :  [['"--name"'   , 'help="Name of the server"'],
                                                  ],
                                       'ls'      :  [[],
                                                  ],
-                                      'reboot'  :  [['"--name"', 'help="Name of the server"'],
+                                      'reboot'  :  [['"--name"'   , 'help="Name of the server"'],
                                                  ],
-                                      'poweroff':  [['"--name"', 'help="Name of the server"'],
+                                      'poweroff':  [['"--name"'   , 'help="Name of the server"'],
                                                  ],
-                                      'poweron' :  [['"--name"', 'help="Name of the server"'],
+                                      'poweron' :  [['"--name"'   , 'help="Name of the server"'],
                                                  ],
                                       'delete'  :  [['"--name"'   , 'help="Name of the server"'],
                                                  ],
                                       'resize'  :  [['"--name"'   , 'help="Name of the server"'],
                                                    ['"--resource"', 'help="New resources of the desired server"'],
                                                  ],
+                                      'rename'  :  [['"--name"'   , 'help="Name of the server"'],
+                                                   ['"--new-name"', 'help="New name of the desired server"'],
+                                                 ],  
                                      }
                         )
     def __call__(self) -> None:

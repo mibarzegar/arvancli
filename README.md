@@ -80,6 +80,11 @@ This tool currently supports below services and actions of the provider:
         ```Bash
         arvancli iaas server resize --name "{SERVER_NAME}" --resource "{RAM}:{CORES}:{DISK}" 
         ```
+    * **rename** command: rename specified server
+
+        ```Bash
+        arvancli iaas server rename --name "{SERVER_NAME}" --new-name "{NEW_SERVER_NAME}"
+        ```
   * **firewall** Entitiy
   
       * **ls** command: get list of firewall groups

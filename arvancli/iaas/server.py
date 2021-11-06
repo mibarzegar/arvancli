@@ -120,3 +120,15 @@ class ServerResizeCommand(Command):
         body = {}
         body['flavor_id'] = f'g1-{self._receiver.get("resource").replace(":", "-")}'
         self._session.send_request('POST', url, body=json.dumps(body))
+
+class ServerRenameCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/servers/{server_id}/rename'
+        url = raw_url.format(server_id=self._receiver.get('server_id'))
+        body = {"name":""}
+        body['name'] = self._receiver.get('new_server_name')
+        self._session.send_request('POST', url, body=json.dumps(body))

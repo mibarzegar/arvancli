@@ -234,6 +234,35 @@ This tool currently supports below services and actions of the provider:
       ```Bash
       arvancli iaas network detach-public --name "{SERVER_NAME}" --ip "{IP_ADDRESS}"
       ```
+    - **add-float** command: Add a new float IP
+
+      ```Bash
+      arvancli iaas network add-float --description "{FLOAT_IP_DESCRIPTION}"
+      ```
+
+    - **list-float** command: List float IPs in configured zone
+
+      ```Bash
+      arvancli iaas network list-float
+      ```
+
+    - **delete-float** command: Delete desired float IP
+
+      ```Bash
+      arvancli iaas network delete-float --ip "{FLOAT_IP_ADDRESS}"
+      ```
+
+    - **attach-float** command: Attach desired float IP to the specified server and private IP
+
+      ```Bash
+      arvancli iaas network attach-float --name "{SERVER_NAME}" --private-ip "{PRIVATE_IP_ADDRESS}" --float-ip "{FLOAT_IP_ADDRESS}"
+      ```
+
+    * **detach-float** command: Detach desired float IP from specified private IP
+
+      ```Bash
+      arvancli iaas network detach-float --ip "{PRIVATE_IP_ADDRESS}"
+      ```
 
 ## Usage
 

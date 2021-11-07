@@ -284,22 +284,22 @@ class NetworkEntitiy:
         cmd = NetworkListCommand(self._receiver, session)
         self._invoker.store_command(cmd)
         self._invoker.execute_command()
-        regions_list = self._invoker.get_result()
+        networks_list = self._invoker.get_result()
         pt = PrettyTable()
-        pt.field_names = regions_list[0].keys()
-        for region in regions_list:
-            pt.add_row(region.values())
+        pt.field_names = networks_list[0].keys()
+        for network in networks_list:
+            pt.add_row(network.values())
         print(pt)
     def _get_servers(self, session: Session) -> None:
         self._receiver.set({'network_name': self._arguments['name']})
         cmd = NetworkServersListCommand(self._receiver, session)
         self._invoker.store_command(cmd)
         self._invoker.execute_command()
-        regions_list = self._invoker.get_result()
+        servers_list = self._invoker.get_result()
         pt = PrettyTable()
-        pt.field_names = regions_list[0].keys()
-        for region in regions_list:
-            pt.add_row(region.values())
+        pt.field_names = servers_list[0].keys()
+        for server in servers_list:
+            pt.add_row(server.values())
         print(pt)
     def _add_ptr(self, session: Session) -> None:
         self._receiver.set({'ptr_ip'  : self._arguments['ip'],
@@ -311,9 +311,7 @@ class NetworkEntitiy:
         self._invoker.execute_command()
         print('PTR record added successfully')
     def _delete_ptr(self, session: Session) -> None:
-        self._receiver.set({'ptr_ip'  : self._arguments['ip'],
-                           }
-                          )
+        self._receiver.set({'ptr_ip'  : self._arguments['ip']})
         cmd = NetworkDeletePtrCommand(self._receiver, session)
         self._invoker.store_command(cmd)
         self._invoker.execute_command()
@@ -329,7 +327,7 @@ class NetworkEntitiy:
         self._invoker.execute_command()
         print(f'Public IP attached successfully')
     def _detach_public(self, session: Session) -> None:
-        self._receiver.set({'public_ip'   : self._arguments['ip']})
+        self._receiver.set({'ip'   : self._arguments['ip']})
         self._receiver.set({'server_name' : self._arguments['name']})
         cmd = ServerIdCommand(self._receiver, session)
         self._invoker.store_command(cmd)
@@ -343,13 +341,80 @@ class NetworkEntitiy:
         self._invoker.store_command(cmd)
         self._invoker.execute_command()
         print(f'Public IP detached successfully')
+    def _add_float_ip(self, session: Session) -> None:
+        self._receiver.set({'float_ip_description' : self._arguments['description']})
+        cmd = NetworkAddFloatIpCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print(f'Float IP created successfully')
+    def _delete_float_ip(self, session: Session) -> None:
+        self._receiver.set({'float_ip' : self._arguments['ip']})
+        cmd = NetworkFloatIpIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'float_ip_id' : self._invoker.get_result()})
+        cmd = NetworkDeleteFloatIpCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print(f'Float IP deleted successfully')
+    def _list_float_ip(self, session: Session) -> None:
+        cmd = NetworkListFloatIpCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        float_ips_list = self._invoker.get_result()
+        pt = PrettyTable()
+        pt.field_names = float_ips_list[0].keys()
+        for float_ip in float_ips_list:
+            pt.add_row(float_ip.values())
+        print(pt)
+    def _attach_float_ip(self, session: Session) -> None:
+        self._receiver.set({'float_ip'    : self._arguments['float_ip'],
+                            'ip'          : self._arguments['private_ip'],
+                            'server_name' : self._arguments['name'],
+                           }
+                          )
+        cmd = ServerIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'server_id' : self._invoker.get_result()})
+        cmd = NetworkSubnetIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'subnet_id' : self._invoker.get_result()})
+        cmd = NetworkPortIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'port_id' : self._invoker.get_result()})
+        cmd = NetworkFloatIpIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'float_ip_id' : self._invoker.get_result()})
+        cmd = NetworkAttachFloatIpCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print('Float IP attached successfully')
+    def _detach_float_ip(self, session: Session) -> None:
+        self._receiver.set({'ip' : self._arguments['ip']})
+        cmd = NetworkPortIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'port_id' : self._invoker.get_result()})
+        cmd = NetworkDetachFloatIpCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print('Float IP detached successfully')
     def _prepare_command_table(self) -> None:
-        self._command_table = {'ls'           : self._get_list,
-                               'list-servers' : self._get_servers,
-                               'add-ptr'      : self._add_ptr,
-                               'delete-ptr'   : self._delete_ptr,
+        self._command_table = {'ls'            : self._get_list,
+                               'list-servers'  : self._get_servers,
+                               'add-ptr'       : self._add_ptr,
+                               'delete-ptr'    : self._delete_ptr,
                                'attach-public' : self._attach_public,
                                'detach-public' : self._detach_public,
+                               'add-float'     : self._add_float_ip,
+                               'list-float'    : self._list_float_ip,
+                               'delete-float'  : self._delete_float_ip,
+                               'attach-float'  : self._attach_float_ip,
+                               'detach-float'  : self._detach_float_ip,
                               }
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
@@ -432,17 +497,29 @@ class NetworkEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
         super().__init__(subparsers, {'ls'            : [[],
                                                         ],
-                                      'list-servers'  : [['"--name"'   , 'help="Name of the network"'],
+                                      'list-servers'  : [['"--name"'            , 'help="Name of the network"'],
                                                         ],
-                                      'add-ptr'       : [['"--ip"'     , 'help="IP address that the PTR record will be assigned to"'],
-                                                        ['"--domain"' , 'help="Domain of the PTR record"'],
+                                      'add-ptr'       : [['"--ip"'              , 'help="IP address that the PTR record will be assigned to"'],
+                                                        ['"--domain"'           , 'help="Domain of the PTR record"'],
                                                         ],
-                                      'delete-ptr'    : [['"--ip"'     , 'help="IP address that the PTR record will be removed from"'],
+                                      'delete-ptr'    : [['"--ip"'              , 'help="IP address that the PTR record will be removed from"'],
                                                         ],
-                                      'attach-public' : [['"--name"'   , 'help="Name of desired server"'],
+                                      'attach-public' : [['"--name"'            , 'help="Name of desired server"'],
                                                         ],
-                                      'detach-public' : [['"--ip"'     , 'help="Public IP address that will be detached from server"'],
-                                                         ['"--name"'   , 'help="Name of desired server"']
+                                      'detach-public' : [['"--ip"'              , 'help="Public IP address that will be detached from server"'],
+                                                         ['"--name"'            , 'help="Name of desired server"']
+                                                        ],
+                                      'add-float'     : [['"--description"'     , 'help="Description of the new float IP"'],
+                                                        ],
+                                      'list-float'    : [[],
+                                                        ],
+                                      'delete-float'  : [['"--ip"'              , 'help="Desired float IP to be removed"'],
+                                                        ],
+                                      'attach-float'  : [['"--float-ip"'        , 'help="Desired float IP to be attached"'],
+                                                         ['"--private-ip"'      , 'help="Desired private IP"'],
+                                                         ['"--name"'            , 'help="Desired server"'],
+                                                        ],
+                                      'detach-float'  : [['"--ip"'              , 'help="Desired private IP"'],
                                                         ],
                                      }
                         )

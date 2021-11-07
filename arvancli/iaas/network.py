@@ -1,4 +1,5 @@
 import json
+import sys
 import arvancli.common.utils as utils
 from arvancli.common.command import Command
 from arvancli.common.receiver import Receiver
@@ -108,7 +109,7 @@ class NetworkPortIdCommand(Command):
             for subnet in network['subnets']:
                 for server in subnet['servers']:
                     for ip in server['ips']:
-                        if ip['ip'] == self._receiver.get('public_ip'):
+                        if ip['ip'] == self._receiver.get('ip'):
                             return ip['port_id']
 
 class NetworkDetachPublicCommand(Command):
@@ -121,4 +122,101 @@ class NetworkDetachPublicCommand(Command):
         url = raw_url.format(port_id=self._receiver.get('port_id'))
         body = {}
         body['server_id'] = self._receiver.get('server_id')
+        self._session.send_request('PATCH', url, body=json.dumps(body))
+
+class NetworkAddFloatIpCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = 'https://napi.arvancloud.com/ecc/v1/regions/{zone}/float-ips'
+        body = {}
+        body['description'] = self._receiver.get('float_ip_description')
+        self._session.send_request('POST', url, body=json.dumps(body))
+
+class NetworkFloatIpIdCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = 'https://napi.arvancloud.com/ecc/v1/regions/{zone}/float-ips'
+        self._session.send_request('GET', url)
+        float_ips_json_array = self._session.get_json_response()["data"]
+        try:
+            selected_float_ip_json = next(element for element in float_ips_json_array if element['floating_ip_address'] == self._receiver.get('float_ip'))
+        except StopIteration:
+            print(f'{self._receiver.get("float_ip")} not found!')
+            sys.exit(1)
+        return selected_float_ip_json['id']
+
+class NetworkListFloatIpCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = 'https://napi.arvancloud.com/ecc/v1/regions/{zone}/float-ips'
+        self._session.send_request('GET', url)
+        float_ips_json_array = self._session.get_json_response()["data"]
+        float_ips_list = []
+        for float_ip in float_ips_json_array:
+            float_ip_json = {}
+            float_ip_json['IP Address'] = float_ip['floating_ip_address']
+            float_ip_json['Status'] =  float_ip['status']
+            float_ip_json['Description'] = float_ip['description']
+            float_ip_json['Connected server'] = float_ip['server']['name'] if float_ip['server'] else ''
+            float_ips_list.append(float_ip_json)
+        return float_ips_list
+
+class NetworkDeleteFloatIpCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/float-ips/{float_ip_id}'
+        url=raw_url.format(float_ip_id=self._receiver.get('float_ip_id'))
+        self._session.send_request('DELETE', url)
+
+class NetworkSubnetIdCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = 'https://napi.arvancloud.com/ecc/v1/regions/{zone}/networks'
+        self._session.send_request('GET', url)
+        networks_json_array = self._session.get_json_response()["data"]
+        networks_list = []
+        for network in networks_json_array:
+            for subnet in network['subnets']:
+                for server in subnet['servers']:
+                    for ip in server['ips']:
+                        if ip['ip'] == self._receiver.get('ip'):
+                            return ip['subnet_id']
+
+class NetworkAttachFloatIpCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/float-ips/{float_ip_id}/attach'
+        url = raw_url.format(float_ip_id=self._receiver.get('float_ip_id'))
+        body = {'server_id' : self._receiver.get('server_id'),
+                'subnet_id' : self._receiver.get('subnet_id'),
+                'port_id'   : self._receiver.get('port_id'),
+               }
+        self._session.send_request('PATCH', url, body=json.dumps(body))
+
+class NetworkDetachFloatIpCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = 'https://napi.arvancloud.com/ecc/v1/regions/{zone}/float-ips/detach'
+        body = {'port_id' : self._receiver.get('port_id')}
         self._session.send_request('PATCH', url, body=json.dumps(body))

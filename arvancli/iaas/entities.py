@@ -5,6 +5,7 @@ from arvancli.iaas.region import *
 from arvancli.iaas.server import *
 from arvancli.iaas.firewall import *
 from arvancli.iaas.network import *
+from arvancli.iaas.image import *
 from prettytable import PrettyTable
 from arvancli.common.utils import Session
 from argparse import _SubParsersAction
@@ -476,6 +477,43 @@ class NetworkEntitiy:
         else:
             raise ValueError(key)
 
+class ImageEntitiy:
+    def __init__(self) -> None:
+        self._prepare_command_table()
+        self._arguments = None
+        self._receiver = Receiver()
+        self._invoker = Invoker()
+    def _get_id(self, session: Session) -> None:
+        self._receiver.set({'image_name': self._arguments['name']})
+        self._receiver.set({'image_type': self._arguments['type']})
+        self._receiver.set({'image_version': self._arguments['version']})
+        cmd = ImageIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        image_id = self._invoker.get_result()
+        print(f'Image ID is: {image_id}')
+    def _get_list(self, session: Session) -> None:
+        self._receiver.set({'image_type': self._arguments['type']})
+        cmd = ImagesListCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        images_list = self._invoker.get_result()
+        pt = PrettyTable()
+        pt.field_names = images_list[0].keys()
+        for image in images_list:
+            pt.add_row(image.values())
+        print(pt)
+    def _prepare_command_table(self) -> None:
+        self._command_table = {'id' : self._get_id,
+                               'ls' : self._get_list
+                              }
+    def run(self, command: str, session: Session, arguments: dict) -> None:
+        self._arguments = arguments
+        if command in self._command_table:
+            self._command_table[command](session)
+        else:
+            raise ValueError(key)
+
 class RegionEntityBuilder(EntityBuilder):
     def __init__(self, subparsers: _SubParsersAction) -> None:
         super().__init__(subparsers, {'ls': [[]]})
@@ -591,4 +629,18 @@ class NetworkEntityBuilder(EntityBuilder):
                         )
     def __call__(self) -> None:
         self._entity = NetworkEntitiy()
+        return self._entity
+
+class ImageEntityBuilder(EntityBuilder):
+    def __init__(self, subparsers: _SubParsersAction) -> None:
+        super().__init__(subparsers, {'id': [['"--name"'   , 'help="Name of the image"'],
+                                             ['"--type"'   , 'help="type of the desired image"'],
+                                             ['"--version"', 'help="version of the desired image"'],
+                                            ],
+                                      'ls': [['"--type"'   , 'help="type of the desired image"'],
+                                            ],
+                                     }
+                        )
+    def __call__(self) -> None:
+        self._entity = ImageEntitiy()
         return self._entity

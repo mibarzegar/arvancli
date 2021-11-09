@@ -288,6 +288,27 @@ This tool currently supports below services and actions of the provider:
       arvancli iaas network detach-private --name "{PRIVATE_NETWORK_NAME}" --server "{SERVER_NAME}" --private-ip "{PRIVATE_IP}"
       ```
 
+  * **image** Entity
+
+    * **id** command: get id of specified image
+
+      ```bash
+      arvancli iaas image id --name "{IMAGE_NAME}" --type "{IMAGE_TYPE}" --version "{IMAGE_VERSION}"
+      ```
+
+    * **list** command: get list of images
+
+      ```bash
+      arvancli iaas image ls --type "{IMAGE_TYPE}"
+      ```
+
+      List will be appeared in a tabular format with below columns:
+
+      * Name
+      * Version
+      * SSH Key Support
+      * SSH Password Support
+
 ## Usage
 
 1. First of all use python3.9 to prevent future problems!

@@ -7,4 +7,4 @@ class Receiver:
         if key in self._arguments:
             return self._arguments[key]
         else:
-            raise ValueError(key)
+            return None

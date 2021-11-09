@@ -1,3 +1,4 @@
 argparse==1.4.0
 prettytable==2.2.1
 requests==2.26.0
+netaddr==0.8.0

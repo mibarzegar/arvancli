@@ -1,5 +1,6 @@
 import json
 import sys
+from netaddr import *
 import arvancli.common.utils as utils
 from arvancli.common.command import Command
 from arvancli.common.receiver import Receiver
@@ -192,10 +193,24 @@ class NetworkSubnetIdCommand(Command):
         networks_list = []
         for network in networks_json_array:
             for subnet in network['subnets']:
+                if subnet['name'] == self._receiver.get('subnet_name'):
+                    return subnet['id']
                 for server in subnet['servers']:
                     for ip in server['ips']:
                         if ip['ip'] == self._receiver.get('ip'):
                             return ip['subnet_id']
+
+class NetworkIdCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = 'https://napi.arvancloud.com/ecc/v1/regions/{zone}/networks'
+        self._session.send_request('GET', url)
+        networks_json_array = self._session.get_json_response()["data"]
+        selected_network_json = next(element for element in networks_json_array if ((element['name'] == self._receiver.get('network_name')) or (not element['name'].isascii() and self._receiver.get('network_name') == 'Default network')))
+        return selected_network_json['id']
 
 class NetworkAttachFloatIpCommand(Command):
     def __init__(self, receiver: Receiver, session: Session) -> None:
@@ -219,4 +234,61 @@ class NetworkDetachFloatIpCommand(Command):
     def execute(self) -> None:
         url = 'https://napi.arvancloud.com/ecc/v1/regions/{zone}/float-ips/detach'
         body = {'port_id' : self._receiver.get('port_id')}
+        self._session.send_request('PATCH', url, body=json.dumps(body))
+
+class NetworkCreatePrivateCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = 'https://napi.arvancloud.com/ecc/v1/regions/{zone}/subnets'
+        body = {'dhcp'           : '',
+                'dns_servers'    : '8.8.8.8',
+                'description'    : '',
+                'enable_dhcp'    : True,
+                'enable_gateway' : True,
+                'name'           : self._receiver.get('private_network_name'),
+                'network_id'     : '',
+                'subnet_gateway' : '',
+                'subnet_id'      : '',
+                'subnet_ip'      : self._receiver.get('private_network_cidr'),
+               }
+        ip = IPNetwork(self._receiver.get('private_network_cidr'))
+        body['subnet_gateway'] = str(ip[1])
+        self._session.send_request('POST', url, body=json.dumps(body))
+
+class NetworkDeletePrivateCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/subnets/{subnet_id}'
+        url = raw_url.format(subnet_id=self._receiver.get('subnet_id'))
+        self._session.send_request('DELETE', url)
+
+class NetworkAttachPrivateIpCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/networks/{network_id}/attach'
+        url = raw_url.format(network_id=self._receiver.get('network_id'))
+        body = {'server_id'          : self._receiver.get('server_id'),
+                'ip'                 : self._receiver.get('private_ip'),
+                'enablePortSecurity' : False,
+               }
+        self._session.send_request('PATCH', url, body=json.dumps(body))
+
+class NetworkDetachPrivateIpCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        raw_url = 'https://napi.arvancloud.com/ecc/v1/regions/{{zone}}/networks/{port_id}/detach'
+        url = raw_url.format(port_id=self._receiver.get('port_id'))
+        body = {'server_id' : self._receiver.get('server_id')}
         self._session.send_request('PATCH', url, body=json.dumps(body))

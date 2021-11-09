@@ -264,6 +264,30 @@ This tool currently supports below services and actions of the provider:
       arvancli iaas network detach-float --ip "{PRIVATE_IP_ADDRESS}"
       ```
 
+    * **create-network** command: Create private network with desired name and subnet address
+
+      ```Bash
+      arvancli iaas network create-network --name "{PRIVATE_NETWORK_NAME}" --cidr "{PRIVATE_NETWORK_CIDR}"
+      ```
+
+    * **delete-network** command: Delete private network with specified name
+
+      ```Bash
+      arvancli iaas network delete-network --name "{PRIVATE_NETWORK_NAME}"
+      ```
+
+    * **attach-private** command: Attach a private IP to the specified server
+
+      ```Bash
+      arvancli iaas network attach-private --name "{PRIVATE_NETWORK_NAME}" --server "{SERVER_NAME}" --private-ip "{PRIVATE_IP}"
+      ```
+
+    * **detach-private** command: Detach private IP from specified server
+
+      ```Bash
+      arvancli iaas network detach-private --name "{PRIVATE_NETWORK_NAME}" --server "{SERVER_NAME}" --private-ip "{PRIVATE_IP}"
+      ```
+
 ## Usage
 
 1. First of all use python3.9 to prevent future problems!

@@ -132,3 +132,33 @@ class ServerRenameCommand(Command):
         body = {"name":""}
         body['name'] = self._receiver.get('new_server_name')
         self._session.send_request('POST', url, body=json.dumps(body))
+
+class ServerCreateCommand(Command):
+    def __init__(self, receiver: Receiver, session: Session) -> None:
+        self._receiver = receiver
+        self._session = session
+        self.result = None
+    def execute(self) -> None:
+        url = 'https://napi.arvancloud.com/ecc/v1/regions/{zone}/servers'
+        body = {"name":"",
+                "count":"",
+                "network_id":"",
+                "flavor_id":"",
+                "image_id":"",
+                "security_groups":[{"name":""}],
+                "ssh_key":"",
+                "key_name":"",
+                "init_script":""
+        }
+        body['name'] = self._receiver.get('server_name')
+        body['count'] = 1
+        body['network_id'] = self._receiver.get('network_id')
+        body['flavor_id'] = f'g1-{self._receiver.get("resource").replace(":", "-")}'
+        body['image_id'] = self._receiver.get('image_id')
+        body['security_groups'][0]['name'] = self._receiver.get('firewall_id')
+        body["ssh_key"], body["key_name"] = [True, self._receiver.get('ssh_key')] if self._receiver.get('ssh_key') else [False, 0]
+        self._session.send_request('POST', url, body=json.dumps(body))
+        if self._receiver.get('ssh_key'):
+            return f'ssh key: {self._receiver.get("ssh_key")}'
+        else:
+            return f'password: {self._session.get_json_response()["data"]["password"]}'

@@ -85,6 +85,13 @@ This tool currently supports below services and actions of the provider:
         ```Bash
         arvancli iaas server rename --name "{SERVER_NAME}" --new-name "{NEW_SERVER_NAME}"
         ```
+    * **create** command: create specified server
+
+        ```Bash
+        arvancli iaas server create  --name "{SERVER_NAME}" --image "{IMAGE_TYPE}:{IMAGE_NAME}:{IMAGE_VERSION}" --resource "{RAM}:{CORES}:{DISK}" --firewall "{FIREWALL_GROUP_NAME}" --network "{NETWORK_NAME}" --ssh-key "{SSHKEY_NAME}"
+        ```
+        **Note:** To create a server with password method, *ssh-key* argument must be ignored.
+
   * **firewall** Entitiy
   
       * **ls** command: get list of firewall groups

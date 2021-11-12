@@ -132,6 +132,31 @@ class ServerEntitiy:
         self._invoker.store_command(cmd)
         self._invoker.execute_command()
         print(f'Rename request sent!')
+    def _create(self, session: Session) -> None:
+        self._receiver.set({'server_name': self._arguments['name']})
+        self._receiver.set({'image_type': self._arguments['image'].split(":")[0]})
+        self._receiver.set({'image_name': self._arguments['image'].split(":")[1]})
+        self._receiver.set({'image_version': self._arguments['image'].split(":")[2]})
+        self._receiver.set({'resource': self._arguments['resource']})
+        self._receiver.set({'firewall_name': self._arguments['firewall']})
+        self._receiver.set({'network_name': self._arguments['network']})
+        self._receiver.set({'ssh_key': self._arguments['ssh_key']})
+        cmd = NetworkIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'network_id': self._invoker.get_result()})
+        cmd = ImageIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'image_id': self._invoker.get_result()})
+        cmd = FirewallIdCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        self._receiver.set({'firewall_id': self._invoker.get_result()})
+        cmd = ServerCreateCommand(self._receiver, session)
+        self._invoker.store_command(cmd)
+        self._invoker.execute_command()
+        print(f'Server creted with {self._invoker.get_result()}')
     def _prepare_command_table(self) -> None:
         self._command_table = {'id'       : self._get_id,
                                'status'   : self._get_status,
@@ -141,7 +166,8 @@ class ServerEntitiy:
                                'poweron'  : self._poweron,
                                'delete'   : self._delete,
                                'resize'   : self._resize,
-                               'rename'   : self._rename
+                               'rename'   : self._rename,
+                               'create'   : self._create
                               }
     def run(self, command: str, session: Session, arguments: dict) -> None:
         self._arguments = arguments
@@ -542,6 +568,13 @@ class ServerEntityBuilder(EntityBuilder):
                                                  ],
                                       'rename'  :  [['"--name"'   , 'help="Name of the server"'],
                                                    ['"--new-name"', 'help="New name of the desired server"'],
+                                                 ],
+                                      'create'  :  [['"--name"'   , 'help="Name of the server"'],
+                                                   ['"--image"'   , 'help="Image of the desired server"'],
+                                                   ['"--resource"', 'help="Resources of the desired server"'],
+                                                   ['"--firewall"', 'help="Name of the firewall group"'],
+                                                   ['"--network"' , 'help="Name of the Network"'],
+                                                   ['"--ssh-key"' , 'help="Name of the ssh-key"'],
                                                  ],  
                                      }
                         )
